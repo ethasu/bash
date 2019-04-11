@@ -1,0 +1,11 @@
+#!/usr/bin/bash
+# str delete
+
+awk '! /^#/' |\
+awk '{gsub(/[\"=_!@$%^&*\()\[\]a-df-zA-DF-Z]/," ");print}' |\
+awk '{gsub(/,:/," ");print}' |\
+awk '{gsub(/^[0-9]\+/," ");print}' |\
+awk '{gsub(/[ ]+/," ");print}' |\
+awk '{gsub(/ $/,"");print}' |\
+awk '{gsub(/^ /,"");print}' |\
+awk '! /^$/'

@@ -1,0 +1,25 @@
+#!/bin/bash
+# Lomb-Scargle_kai
+awk '! /^#|^.$/' |\
+awk -M '{x[NR]=$1;y[NR]=$2;ysum+=$2;}\
+   END{yave=ysum/NR;pi=atan2(0,-0);st=1;pt=1;en=10;\
+   if(arg_st>0&&arg_pt>0&&arg_en>arg_st){
+       st=arg_st;pt=arg_pt;en=arg_en}
+   for(f=st;f<=en;f+=pt){
+       YS=YC=CC=SS=CS=0;w=2*pi*f;\
+       for(i in x){
+          wt=w*x[i];coswt=cos(wt);sinwt=sin(wt);\
+          YC+=(y[i]-yave)*coswt;\
+          YS+=(y[i]-yave)*sinwt;\
+          CC+=(coswt)^2;SS+=(sinwt)^2;\
+          CS+=coswt*sinwt}
+       A_u=YC*CS-YS*CC;B_u=YS*CS-YC*SS;\
+       D=CS^2-SS*CC;AD=A_u/D;BD=B_u/D;\
+       p=sqrt(AD^2+BD^2);\
+       t=atan2(B_u,A_u);\
+       t=t*180/pi;\
+       if(A_u<0){
+          if(B_u<0)t+=180;\
+          else     t-=180}
+       print f,p,t}
+   }' arg_st=$1 arg_pt=$2 arg_en=$3

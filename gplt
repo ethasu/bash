@@ -1,0 +1,31 @@
+#!/bin/bash -e
+
+#filename=`cat /dev/urandom | LC_CTYPE=C tr -dc 'a-z0-9' | head -c 30`
+filename=temp_01.dat
+
+cat > $filename
+
+op=`echo $@ | sed -e 's/w lp/w lp pt 6/g' -e 's/,/ , ""/g' -e 's/axis/axis x1y2/g'`
+echo $op
+
+if [ $# -eq 0 ]
+then
+
+gnuplot -p <<EOF
+set nokey
+set grid
+plot '$filename' w p pt 6
+EOF
+
+else
+
+gnuplot -p <<EOF
+set nokey
+set grid
+set y2tics
+plot '$filename' $op
+EOF
+
+fi
+
+rm $filename

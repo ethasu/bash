@@ -1,0 +1,5 @@
+#!/bin/bash
+# histgram 
+# option : dosu
+awk 'BEGIN{bin=1}{if(b>0)bin=b;f[int($1/bin)]++}END{for(i in f)print i*bin,f[i]}' b=$1 |\
+sort -n

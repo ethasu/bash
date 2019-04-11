@@ -1,0 +1,14 @@
+#!/bin/bash
+# Regression line
+awk 'BEGIN{xr=1;yr=2;if(xrow>0&&yrow>0){xr=xrow;yr=yrow}}
+     {dx[NR]=$xr;dy[NR]=$yr;avg_x+=dx[NR];avg_y+=dy[NR]};\
+     END{ax=avg_x/NR;ay=avg_y/NR;\
+     for(i in dx){
+        dxax=dx[i]-ax;dyay=dy[i]-ay;\
+        s+=dxax*dyay;sx+=dxax^2;sy+=dyay^2}
+     a=s/sx;b=ay-s/sx*ax;
+     for(i in dx)print dx[i],dy[i]-a*dx[i]-b;\
+     print "# keisu  :",a;\
+     print "# seppen :",b;\
+     print "# R      :",(s/sqrt(sx*sy))^2;\
+     }' xrow=$1 yrow=$2

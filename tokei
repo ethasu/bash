@@ -1,0 +1,44 @@
+#!/bin/bash
+# サンプル数,最大値,最小値,合計,平均,3σ
+# option1 : 整数入力:データ軸(列)指定.
+# option2 : '-ave':平均オフセット(-ave)
+#           '-max':最大値オフセット(/max)
+#           '-min':最小値オフセット(-min)
+#           '-stan1':0~1規格化
+#           '-stan2':正規分布標準化(ave=0,σ=1)
+awk '! /^.$/' | awk '! /^#/' | awk '! /[a-df-zA-DF-Z]/' |\
+awk 'NR==1{rec=min_cnt=max_cnt=1;if(row>0)rec=row;max=min=$rec;}
+    {d[NR]=$rec;sum+=$rec;org[NR]=$0;}
+    min>$rec{min=$rec;min_cnt=NR;}
+    max<$rec{max=$rec;max_cnt=NR;}
+    END{ave=sum/NR;\
+      for(i=1;i<=NR;i++)sqsum+=(d[i]-ave)**2;
+      sig=sqrt(sqsum/(NR-1));\
+      if     (opt=="-ave")ave_stan(d,ave);\
+      else if(opt=="-max")max_stan(d,max);\
+      else if(opt=="-min")min_stan(d,min);\
+      else if(opt=="-stan1")stan1(d,min,max);\
+      else if(opt=="-stan2")stan2(d,ave,sig);\
+      else{print "# no   : ",NR;\
+           print "# max  : ",max," no : ",max_cnt;\
+           print "# min  : ",min," no : ",min_cnt;\
+           print "# sum  : ",sum;\
+           print "# ave  : ",ave;\
+           print "# 3sig : ",sig*3}
+    }
+    function ave_stan(data,ave){for(i in data)print org[i],data[i]-ave}
+    function max_stan(data,max){for(i in data)print org[i],data[i]/max}
+    function min_stan(data,min){for(i in data)print org[i],data[i]-min}
+    function stan1(data,min,max){for(i in data)print org[i],(data[i]-min)/(max-min)}
+    function stan2(data,ave,sig){for(i in data)print org[i],(data[i]-ave)/sig}
+    ' row=$1 opt=$2 |\
+awk '{if(opt=="-ave"||opt=="-max"||opt=="-min"||opt=="-stan1"||opt=="-stan2"){
+        for(i=1;i<NF;i++){
+          if(i==row)printf("%g ",$NF);\
+          else      printf("%g ",$i);\
+        }
+        printf("\n");\
+      }else{
+        print $0;
+      }
+    }' row=$1 opt=$2

@@ -1,0 +1,23 @@
+#!/bin/bash
+delstr > fit_data.dat
+
+# parameter output
+max=`cat fit_data.dat | tokei 2 | grep max | p 4 | awk '($1==0){$1=0.1}{print}'`
+min=`cat fit_data.dat | tokei 2 | grep min | p 4 | awk '($1==0){$1=0.1}{print}'`
+max_ind=`cat fit_data.dat | tokei 2 | grep max | p 7 | awk '($1==0){$1=0.1}{print}'`
+max_at_x=`cat fit_data.dat | awk 'NR==s{print $1}' s=$max_ind | awk '($1==0){$1=0.1}{print}'`
+half=`cat fit_data.dat | awk '{if((max/2)<$2){print (max_at_x-$1)/5;exit;}}' max=$max max_at_x=$max_at_x | awk '($1==0){$1=0.1}{print}'`
+
+# fitting from gnuplot
+gnuplot<<EOF
+set print '-'
+a=$max
+b=$max_at_x
+c=$half
+d=$min
+f(x) = a*exp(-((x-b)/c)**2)+d
+fit f(x) 'fit_data.dat' via a,b,c,d
+show variables
+EOF
+
+rm fit.log fit_data.dat

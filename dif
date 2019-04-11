@@ -1,0 +1,12 @@
+#!/usr/bin/bash
+
+row=$1
+awk '{if(row>0)d[NR]=$row;\
+      else     d[NR]=$1;\
+      org[NR]=$0}
+     END{for(i=1;i<NR;i++)print org[i],d[i+1]-d[i]}' row=$row |\
+awk '{for(i=1;i<NF;i++){\
+        if(i==row)printf("%s ",$NF);\
+        else      printf("%s ",$i);\
+      }printf("\n");\
+     }' row=$row

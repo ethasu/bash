@@ -1,0 +1,26 @@
+#!/bin/bash -e
+# {X,Y,Z}データからバブルチャートを作成
+# 参考 : http://takeno.iee.niit.ac.jp/~shige/unix/gnuplot/gpinfo-2008.html
+
+cat > tmp_all.dat
+
+# wafer size check
+wafer_size=``
+
+gnuplot -p <<EOF
+set clip points
+unset key
+set size square
+# set xrange [0:6]
+# set yrange [0:6]
+scale = 0.025
+plot '< sort +2 -3 -n -r tmp_all.dat' using (\$3>=0 ? \$1*10**-6 : 1/0):(\$3>=0 ? \$2*10**-6 : 1/0):(\$3>=0 ? \$3*scale : 1/0)\
+ with circles lt 3 fs solid border -1
+replot '< sort +2 -3 -n -r tmp_all.dat' using (\$3<0 ? \$1*10**-6 : 1/0):(\$3<0 ? \$2*10**-6 : 1/0):(\$3<0 ? -\$3*scale : 1/0)\
+ with circles lt 1 fs solid border -1
+# wafer plot
+set parametric
+replot [0:2*pi] 150*cos(t),150*sin(t) lt -1 lw 2
+EOF
+
+rm tmp_all.dat

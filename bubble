@@ -2,25 +2,115 @@
 # {X,Y,Z}データからバブルチャートを作成
 # 参考 : http://takeno.iee.niit.ac.jp/~shige/unix/gnuplot/gpinfo-2008.html
 
-cat > tmp_all.dat
+cat | awk '{print -$1*10**-6,-$2*10**-6,$3}' > tmp_all.dat
 
 # wafer size check
-wafer_size=``
+wafer_size=`cat tmp_all.dat |\
+awk '{if(max**2<$2**2){max=sqrt($2**2);};if(max**2<$1**2){max=sqrt($1**2);}}\
+END{if(max>75){print 150}\
+else if(max>32.5){print 75}\
+else if(max>16.25){print 32.5}\
+else{print 0}}'`
 
+# min check
+# min=`cat tmp_all.dat | awk '{if(min>=$3)min=$3}END{print min}'`
+
+# max check
+# max=`cat tmp_all.dat | awk '{if(max<=$3)max=$3}END{print max}'`
+
+# abs_max check
+abs_max=`cat tmp_all.dat | awk '{if(abs_max**2<=$3**2)abs_max=sqrt($3**2)}END{print abs_max}'`
+
+# wafer描画用円ファイルの作成
+gnuplot <<EOF
+set table 'wafer_tmp.dat'
+set parametric
+plot [0:2*pi] $wafer_size*cos(t),$wafer_size*sin(t)
+EOF
+cat wafer_tmp.dat | sed 's/i/0/g' > wafer.dat
+rm wafer_tmp.dat
+
+### バブルチャート
 gnuplot -p <<EOF
 set clip points
-unset key
 set size square
-# set xrange [0:6]
-# set yrange [0:6]
-scale = 0.025
-plot '< sort +2 -3 -n -r tmp_all.dat' using (\$3>=0 ? \$1*10**-6 : 1/0):(\$3>=0 ? \$2*10**-6 : 1/0):(\$3>=0 ? \$3*scale : 1/0)\
+set parametric
+set xlabel 'x [mm]'
+set ylabel 'y [mm]'
+set palette defined ( 0 '#000090',1 '#000fff',2 '#0090ff',3 '#0fffee',4 '#ffffff',5 '#ffee00',6 '#ff7000',7 '#ee0000',8 '#7f0000')
+unset key
+scale = 0.01
+plot '< sort +2 -3 -n -r tmp_all.dat' using (\$3>=0 ? \$1 : 1/0):(\$3>=0 ? \$2 : 1/0):(\$3>=0 ? \$3*scale : 1/0)\
  with circles lt 3 fs solid border -1
-replot '< sort +2 -3 -n -r tmp_all.dat' using (\$3<0 ? \$1*10**-6 : 1/0):(\$3<0 ? \$2*10**-6 : 1/0):(\$3<0 ? -\$3*scale : 1/0)\
+replot '< sort +2 -3 -n -r tmp_all.dat' using (\$3<0 ? \$1 : 1/0):(\$3<0 ? \$2 : 1/0):(\$3<0 ? -\$3*scale : 1/0)\
  with circles lt 1 fs solid border -1
 # wafer plot
-set parametric
-replot [0:2*pi] 150*cos(t),150*sin(t) lt -1 lw 2
+replot [0:2*pi] $wafer_size*cos(t),$wafer_size*sin(t) lt -1 lw 2
+# sequence plot
+replot 'tmp_all.dat' w l
 EOF
 
-rm tmp_all.dat
+### カラーマップ1
+gnuplot -p <<EOF
+set tics font "Times New Roman,25"   # 目盛りのフォントの変更
+set xlabel font "Times New Roman,25" # xlabelのフォントの変更
+set ylabel font "Times New Roman,25" # ylabelのフォントの変更
+set zlabel font "Times New Roman,25" # zlabelのフォントの変更
+set key font "Times New Roman,25"    # 凡例のフォントの変更
+set clip points
+set size square
+set xlabel 'x [mm]'
+set ylabel 'y [mm]'
+set cblabel 'z [nm]'
+set xrange [-$wafer_size:$wafer_size]
+set yrange [-$wafer_size:$wafer_size]
+# jet color 参考 : http://slpr.sakura.ne.jp/qp/pm3d-colormap/
+set palette defined ( 0 '#000090',1 '#000fff',2 '#0090ff',3 '#0fffee',4 '#90ff70',5 '#ffee00',6 '#ff7000',7 '#ee0000',8 '#7f0000')
+set view map
+set multiplot
+unset key
+
+# date plot
+splot 'tmp_all.dat' u 1:2:3 w p pt 5 ps 4 palette
+
+## wafer plot
+splot 'wafer.dat' w l lt -1 lw 2
+
+# sequence plot
+splot 'tmp_all.dat' u 1:2:3 w l
+EOF
+
+### カラーマップ2
+gnuplot -p <<EOF
+set tics font "Times New Roman,25"   # 目盛りのフォントの変更
+set xlabel font "Times New Roman,25" # xlabelのフォントの変更
+set ylabel font "Times New Roman,25" # ylabelのフォントの変更
+set zlabel font "Times New Roman,25" # zlabelのフォントの変更
+set key font "Times New Roman,25"    # 凡例のフォントの変更
+set clip points
+set size square
+set xlabel 'x [mm]'
+set ylabel 'y [mm]'
+set cblabel 'z [nm]'
+set xrange [-$wafer_size:$wafer_size]
+set yrange [-$wafer_size:$wafer_size]
+## jet color 参考 : http://slpr.sakura.ne.jp/qp/pm3d-colormap/
+## jet color centor white
+set palette defined ( 0 '#000090',1 '#000fff',2 '#0090ff',3 '#0fffee',4 '#ffffff',5 '#ffee00',6 '#ff7000',7 '#ee0000',8 '#7f0000')
+set cbrange[-$abs_max:$abs_max]
+unset key
+set view map
+set multiplot
+
+# date plot
+splot 'tmp_all.dat' u 1:2:3 w p pt 5 ps 4 palette
+
+## wafer plot
+splot 'wafer.dat' w l lt -1 lw 2
+
+# sequence plot
+splot 'tmp_all.dat' u 1:2:3 w l
+EOF
+
+
+rm tmp_all.dat wafer.dat

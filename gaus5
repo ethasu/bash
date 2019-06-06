@@ -1,0 +1,221 @@
+#!/bin/bash
+delstr > all_tmp.dat
+
+cat all_tmp.dat | sg row 2 dim 2 |\
+awk '{print $1,-$2}' | tokei 2 -max > dim2.dat
+
+max_ind1=`cat dim2.dat | tokei 2 | grep max | p 7`
+# echo "max_ind1 $max_ind1"
+max1=`cat all_tmp.dat | awk 'NR==s{print $2}' s=$max_ind1`
+# echo "max $max1"
+max_at_x1=`cat all_tmp.dat | awk 'NR==s{print $1}' s=$max_ind1 | awk '($1==0){$1=0.1}{print}'`
+# echo "max_at_x1 $max_at_x1"
+half1=`cat dim2.dat |\
+ awk '{x[NR]=$1;y[NR]=$2}
+       END{\
+        for(i=0;i<=NR;i++){\
+            if(y[m+i]<0){\
+                print sqrt(((x[m]-x[m+i])**2));\
+                exit;\
+            }
+            if(y[m-i]<0){\
+                print sqrt(((x[m]-x[m-i])**2));\
+                exit;\
+            }
+         }
+        }' m=$max_ind1 |\
+ awk '($1==0){$1=0.1}{print}'`
+# echo "half1 $half1"
+
+# 最初のピークを削除…
+cat dim2.dat |\
+ awk '{x[NR]=$1;y[NR]=$2}
+  END{
+      for(i=1;i<=NR;i++){
+          if(i>=m-h && i<=m+h){
+              print x[i],0;\
+          }else{
+              print x[i],y[i];\
+          }
+      }
+  }' m=$max_ind1 h=$half1 | tokei 2 -max > tmp.dat
+
+rm dim2.dat
+mv tmp.dat dim2.dat
+
+max_ind2=`cat dim2.dat | tokei 2 | grep max | p 7`
+# echo "max_ind2 $max_ind2"
+max2=`cat all_tmp.dat | awk 'NR==s{print $2}' s=$max_ind2`
+# echo "max $max2"
+max_at_x2=`cat all_tmp.dat | awk 'NR==s{print $1}' s=$max_ind2 | awk '($1==0){$1=0.1}{print}'`
+# echo "max_at_x2 $max_at_x2"
+half2=`cat dim2.dat |\
+ awk '{x[NR]=$1;y[NR]=$2}
+       END{\
+        for(i=0;i<=NR;i++){\
+            if(y[m+i]<0){\
+                print sqrt(((x[m]-x[m+i])**2));\
+                exit;\
+            }
+            if(y[m-i]<0){\
+                print sqrt(((x[m]-x[m-i])**2));\
+                exit;\
+            }
+         }
+        }' m=$max_ind2 |\
+ awk '($1==0){$1=0.1}{print}'`
+# echo "half2 $half2"
+
+# 2個目のピークを削除…
+cat dim2.dat |\
+ awk '{x[NR]=$1;y[NR]=$2}
+  END{
+      for(i=1;i<=NR;i++){
+          if(i>=m-h && i<=m+h){
+              print x[i],0;\
+          }else{
+              print x[i],y[i];\
+          }
+      }
+  }' m=$max_ind2 h=$half2 | tokei 2 -max > tmp.dat
+
+rm dim2.dat
+mv tmp.dat dim2.dat
+
+max_ind3=`cat dim2.dat | tokei 2 | grep max | p 7`
+# echo "max_ind3 $max_ind3"
+max3=`cat all_tmp.dat | awk 'NR==s{print $2}' s=$max_ind3`
+# echo "max $max2"
+max_at_x3=`cat all_tmp.dat | awk 'NR==s{print $1}' s=$max_ind3 | awk '($1==0){$1=0.1}{print}'`
+# echo "max_at_x3 $max_at_x3"
+half3=`cat dim2.dat |\
+ awk '{x[NR]=$1;y[NR]=$2}
+       END{\
+        for(i=0;i<=NR;i++){\
+            if(y[m+i]<0){\
+                print sqrt(((x[m]-x[m+i])**2));\
+                exit;\
+            }
+            if(y[m-i]<0){\
+                print sqrt(((x[m]-x[m-i])**2));\
+                exit;\
+            }
+         }
+        }' m=$max_ind3 |\
+ awk '($1==0){$1=0.1}{print}'`
+# echo "half3 $half3"
+
+# 3個目のピークを削除…
+cat dim2.dat |\
+ awk '{x[NR]=$1;y[NR]=$2}
+  END{
+      for(i=1;i<=NR;i++){
+          if(i>=m-h && i<=m+h){
+              print x[i],0;\
+          }else{
+              print x[i],y[i];\
+          }
+      }
+  }' m=$max_ind3 h=$half3 | tokei 2 -max > tmp.dat
+
+rm dim2.dat
+mv tmp.dat dim2.dat
+
+max_ind4=`cat dim2.dat | tokei 2 | grep max | p 7`
+# echo "max_ind4 $max_ind4"
+max4=`cat all_tmp.dat | awk 'NR==s{print $2}' s=$max_ind4`
+# echo "max $max4"
+max_at_x4=`cat all_tmp.dat | awk 'NR==s{print $1}' s=$max_ind4 | awk '($1==0){$1=0.1}{print}'`
+# echo "max_at_x4 $max_at_x4"
+half4=`cat dim2.dat |\
+ awk '{x[NR]=$1;y[NR]=$2}
+       END{\
+        for(i=0;i<=NR;i++){\
+            if(y[m+i]<0){\
+                print sqrt(((x[m]-x[m+i])**2));\
+                exit;\
+            }
+            if(y[m-i]<0){\
+                print sqrt(((x[m]-x[m-i])**2));\
+                exit;\
+            }
+         }
+        }' m=$max_ind4 |\
+ awk '($1==0){$1=0.1}{print}'`
+# echo "half4 $half4"
+
+# 4個目のピークを削除…
+cat dim2.dat |\
+ awk '{x[NR]=$1;y[NR]=$2}
+  END{
+      for(i=1;i<=NR;i++){
+          if(i>=m-h && i<=m+h){
+              print x[i],0;\
+          }else{
+              print x[i],y[i];\
+          }
+      }
+  }' m=$max_ind4 h=$half4 | tokei 2 -max > tmp.dat
+
+rm dim2.dat
+mv tmp.dat dim2.dat
+
+max_ind5=`cat dim2.dat | tokei 2 | grep max | p 7`
+# echo "max_ind4 $max_ind4"
+max5=`cat all_tmp.dat | awk 'NR==s{print $2}' s=$max_ind5`
+# echo "max $max5"
+max_at_x5=`cat all_tmp.dat | awk 'NR==s{print $1}' s=$max_ind5 | awk '($1==0){$1=0.1}{print}'`
+# echo "max_at_x5 $max_at_x5"
+half5=`cat dim2.dat |\
+ awk '{x[NR]=$1;y[NR]=$2}
+       END{\
+        for(i=0;i<=NR;i++){\
+            if(y[m+i]<0){\
+                print sqrt(((x[m]-x[m+i])**2));\
+                exit;\
+            }
+            if(y[m-i]<0){\
+                print sqrt(((x[m]-x[m-i])**2));\
+                exit;\
+            }
+         }
+        }' m=$max_ind5 |\
+ awk '($1==0){$1=0.1}{print}'`
+# echo "half5 $half5"
+
+min=`cat dim2.dat | tokei 2 | grep min | p 4 | awk '($1==0){$1=0.1}{print}'`
+sampleno=`cat all_tmp.dat | wc -l`
+
+# fitting from gnuplot
+gnuplot -p <<EOF
+set print '-'
+
+a1=$max1-$min
+b1=$max_at_x1
+c1=$half1*sqrt(2)
+
+a2=$max2-$min
+b2=$max_at_x2
+c2=$half2*sqrt(2)
+
+a3=$max3-$min
+b3=$max_at_x3
+c3=$half3*sqrt(2)
+
+a4=$max4-$min
+b4=$max_at_x4
+c4=$half4*sqrt(2)
+
+a5=$max5-$min
+b5=$max_at_x5
+c5=$half5*sqrt(2)
+d=$min
+set sample $sampleno
+f(x) = a1*exp(-((x-b1)/c1)**2) + a2*exp(-((x-b2)/c2)**2) + a3*exp(-((x-b3)/c3)**2) + a4*exp(-((x-b4)/c4)**2) + a5*exp(-((x-b5)/c5)**2) + d
+fit f(x) 'all_tmp.dat' via a1, b1, c1, a2, b2, c2, a3, b3, c3, a4, b4, c4, a5, b5, c5, d
+# show variables
+print b1,b2,b3,b4,b5
+plot 'all_tmp.dat' w p pt 6 , f(x) w l
+EOF
+
+rm all_tmp.dat dim2.dat fit.log

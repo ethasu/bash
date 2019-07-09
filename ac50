@@ -43,16 +43,21 @@ if [ `echo $set | grep MLE | wc -l` -eq 1 ];then
     key+=' z1 z2 z3'
 fi
 if [ `echo $set | grep LESER | wc -l` -eq 1 ];then
-    key+=' lsr1 lsr2'
+    key+=' lsr1 lsr2 lsr3'
 fi
 if [ `echo $set | grep EXTRA | wc -l` -eq 1 ];then
     key+=' ex1 ex2 ex3 ex4 ex5 ex6 ex7 ex8'
 fi
 
-row=`echo $key | perl -pe 's/ /\n/g' |
-    awk '(arg~$1 && $1>0){printf("%d ",NR)}' arg=$arg |
-    sed -re 's/ ([1-9])/,$\1/g' -re 's/^([1-9])/$\1/g'`
+if [ $# -eq 0 ];then
+    echo '#' $key
+    cat $data
+else
+    row=`echo $key | perl -pe 's/ /\n/g' |
+        awk '(arg~$1 && $1>0){printf("%d ",NR)}' arg=$arg |
+        sed -re 's/ ([1-9])/,$\1/g' -re 's/^([1-9])/$\1/g'`
+    cat $data | awk "{print $row}"
+fi
 
-cat $data | awk "{print $row}"
 
 rm $allfile $data

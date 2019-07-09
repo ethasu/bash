@@ -1,0 +1,58 @@
+#!/bin/bash
+# アクイジションをCUIで編集したい。まずは50iZ ver
+
+allfile=all_tmp.dat
+data=datafile.dat
+
+cat > $allfile
+cat $allfile | grep -v '%' > $data
+set=`grep '%' $allfile`
+arg=`echo $@ | sed 's/ /,/g'`
+
+# setting check
+if [ `echo $set | grep POS | wc -l` -eq 1 ];then
+    key+='x y z qx qy qz aux'
+    # X,Y係数かけて単位換算する。ERRXYもか？
+    cat $data |
+    awk '{
+        for(i=1;i<=no;i++){
+            if(i<=2){
+                printf("%d ",$i*0.309);\
+            }else{
+                printf("%d ",$i);\
+            }
+            printf("\n");\
+        }
+    }' no=`head -n 1 $data | wc -w` > data_tmp.dat
+    rm $data
+    mv data_tmp.dat $data
+fi
+if [ `echo $set | grep ERR | wc -l` -eq 1 ];then
+    key+=' errx erry errz errqx errqy errqz erraux'
+fi
+if [ `echo $set | grep DAC | wc -l` -eq 1 ];then
+    key+=' dacx dacyl dacyr'
+fi
+if [ `echo $set | grep INDEX | wc -l` -eq 1 ];then
+    key+=' indx indy indz indqx indqy indqz'
+fi
+if [ `echo $set | grep MISC | wc -l` -eq 1 ];then
+    key+=' optf li lips'
+fi
+if [ `echo $set | grep MLE | wc -l` -eq 1 ];then
+    key+=' z1 z2 z3'
+fi
+if [ `echo $set | grep LESER | wc -l` -eq 1 ];then
+    key+=' lsr1 lsr2'
+fi
+if [ `echo $set | grep EXTRA | wc -l` -eq 1 ];then
+    key+=' ex1 ex2 ex3 ex4 ex5 ex6 ex7 ex8'
+fi
+
+row=`echo $key | perl -pe 's/ /\n/g' |
+    awk '(arg~$1 && $1>0){printf("%d ",NR)}' arg=$arg |
+    sed -re 's/ ([1-9])/,$\1/g' -re 's/^([1-9])/$\1/g'`
+
+cat $data | awk "{print $row}"
+
+rm $allfile $data

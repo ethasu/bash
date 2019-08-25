@@ -1,0 +1,34 @@
+#!/bin/bash -e
+# 列方向のグラフを全て一括表示
+
+#filename=`cat /dev/urandom | LC_CTYPE=C tr -dc 'a-z0-9' | head -c 30`
+filename=temp_01.dat
+
+cat > $filename
+
+# col no get
+nf=`tac $filename | awk 'NR==1{print NF}'`
+
+# option setting
+op=`echo $@ | sed -e 's/w lp/w lp pt 6/g' -e 's/,/ , ""/g'`
+
+if [ $# -eq 0 ]
+then
+# w/o option -> point plot
+gnuplot -p <<EOF
+set key
+set grid
+plot for [i=2:$nf] '$filename' u 1:i title sprintf("%d",i-1) w p pt 6
+EOF
+
+else
+# w/ option
+gnuplot -p <<EOF
+set key
+set grid
+plot for [i=2:$nf] '$filename' u 1:i title sprintf("%d",i-1) $op
+EOF
+
+fi
+
+rm $filename
